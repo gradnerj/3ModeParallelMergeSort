@@ -22,14 +22,20 @@ int main(){
     std::cout << std::endl;
     sort_blocks(a1);
 	//sort_blocks(arr2);
-	for(int i = 0; i < 32; i++)
+	for(int i = 0; i < 32; i++){
 		std::cout << a1[i] << " ";
+	}
 	std::cout << std::endl;
 	__m512i first = _mm512_load_si512(&a1[0]);
     __m512i second = _mm512_load_si512(&a1[16]);
 
 	print_vector_int(first, "First");
     print_vector_int(second, "Second");
+	
+	__m512i l = _mm512_min_epi32(first, second);
+	__m512i h = _mm512_max_epi32(first, second);
 
+	print_vector_int(l, "low");
+	print_vector_int(h, "high");
     return 0;
 }
