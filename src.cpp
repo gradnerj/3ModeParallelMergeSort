@@ -3,7 +3,7 @@
 #include "raw_bitonic.h"
 
 const unsigned int BLOCK_SIZE = 16;
-const unsigned int N = 128;
+const unsigned int N = 256;
 const unsigned int BLOCKS = N / BLOCK_SIZE;
 
 void sort_blocks(int* arr){
@@ -27,6 +27,7 @@ int main(){
 	*/
 
 	// 128 values
+	/*
 	int data[] = {30,  48,  34,   0,  94,   2,  64,  47,  35,  51,  94,  20,   9,
         20,  51,  67,   5,  72,  67,  26,  68,  93,   3,   6,  83,  99,
         42,  16,  91,  15,  23,  36,  68,  67,  57,  23,  59,  20,  38,
@@ -37,7 +38,29 @@ int main(){
         52,  42,  60,  95,  19,  79,  50,  62,  46,  18,  25,  84,  35,
          0,  84,  22,  39,   0,  69,  91,  87,  25,  10, 100,   8,  77,
         72,  85,  86,  28,  89,  28,  59,  14,  68,  99,  95};
+	*/
 
+	// 256 values
+	int data[] = {78,  22,  60,  62,  29,  57,   6,  48,  58,  38,  22,  64,  77,
+         3,  39,  39,  83,  14,   0,  71,  55,   5,  32,  76,  48,   8,
+        65,  34,  40,  91,  42,  48,  19,  89,  56,  55,  19,  72,  91,
+        14,  45,  14,  49,  81,  29,  53,  60,  82,  48,  18,  75,   8,
+        40,  96,   9,  60,  32,  52,  31,  34,   6,  23,  43,  87,  68,
+        25,  73,  74,   5,  63,  52,  96,  70,  52,  26,   2,  80,  22,
+        64,  49,  13,  70,  77,  48,  15,   4,  22,  29,  71,  78,  34,
+        65,  70,  96,   9,  82,  25,  90,   8,  99,  22,  57,  14,   9,
+        17, 100,  26,  93,  89,   0,  52,  66,  28,  10,  15,   9,  46,
+         3,  94,  10,   9,  80,  85,  16,  31,  38,  47,  97,  19,  14,
+         0,  62, 100,  59,  24,  79,  37,   1,  91,  92,  45,  20,  45,
+        58,  50,  60,  19,  68,  99,  26,  24,  50,  55,  76,  28,  82,
+        50,  29,  66,  55,  73,  46,   3,  40,  83,  31,  48,  84,  16,
+        44,  98,  70,  13,  37,  68,  39,  84,  11,  14,  81,  52,  28,
+        83,  40, 100,  97,  87,  16,  81,  86,  69,  32,  62,  80,  59,
+        24,  60,  91,  82,  74,  25,  56,  35,  41,  87,  27,  20,   9,
+        82,  57,  18,  93,   0,  25,  41,   7,  55,  63,  33,  57,  30,
+        32,  97,  20,  27,  72,  87,   1,  31,  24,  66,   0,  24,  28,
+        80,  47,  15,   8,  99,  10,  81,  18,  90,   8,  52,  33,  35,
+        10,   1,  23,  84,  23,  64,  36,  20,  74};
 
 
 	int* arr = (int*)aligned_alloc(64, sizeof(int) * N);
@@ -63,7 +86,7 @@ int main(){
 	// Start of psuedocode implementation
 	__m512i A1in, A2in, B1in, B2in, C1in, C2in, D1in, D2in,A1out, A2out, B1out, B2out, C1out, C2out, D1out, D2out;	
 	int sorted_block_size = 16;
-	int end_sorted_block_size = 32;
+	int end_sorted_block_size = 64;
 
 	while(sorted_block_size < end_sorted_block_size){
 		int start_idx = 0;
@@ -72,13 +95,13 @@ int main(){
 		for(int arr_idx = start_idx; arr_idx < end_idx; arr_idx += sorted_block_size * 8){
 			// 8 starting indices and 8 ending indices				
 			int stA1 = arr_idx, 
-				stA2 = arr_idx + BLOCK_SIZE,
-				stB1 = arr_idx + BLOCK_SIZE * 2,
-				stB2 = arr_idx + BLOCK_SIZE * 3,
-				stC1 = arr_idx + BLOCK_SIZE * 4, 
-				stC2 = arr_idx + BLOCK_SIZE * 5,
-				stD1 = arr_idx + BLOCK_SIZE * 6, 
-				stD2 = arr_idx + BLOCK_SIZE * 7; 
+				stA2 = arr_idx + sorted_block_size,
+				stB1 = arr_idx + sorted_block_size * 2,
+				stB2 = arr_idx + sorted_block_size * 3,
+				stC1 = arr_idx + sorted_block_size * 4, 
+				stC2 = arr_idx + sorted_block_size * 5,
+				stD1 = arr_idx + sorted_block_size * 6, 
+				stD2 = arr_idx + sorted_block_size * 7; 
 			
 			int	eA1 = stA1 + BLOCK_SIZE, 
 				eA2 = stA2 + BLOCK_SIZE,
@@ -105,7 +128,7 @@ int main(){
 			D1in = _mm512_load_si512(&arr[stD1]);
 			D2in = _mm512_load_si512(&arr[stD2]);
 			
-			for(int j = 0; j < (sorted_block_size / 8) - 1; ++j){
+			for(int j = 0; j < (sorted_block_size / 8) - 1; j++){
 
 				std::cout << "Sorted block size: " << sorted_block_size << std::endl;		
 				
@@ -127,7 +150,8 @@ int main(){
 				C1in = C2out;
 			    D1in = D2out;	
 				std::cout << "j: " << j << std::endl;	
-				if(j+1 == (sorted_block_size / 8) - 1){
+				
+				if(j+1 == ((sorted_block_size / 8) - 1)){
 					_mm512_store_si512(arr+write_A, A2out);
 					_mm512_store_si512(arr+write_B, B2out);
 					_mm512_store_si512(arr+write_C, C2out);
