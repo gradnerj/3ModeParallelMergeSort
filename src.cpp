@@ -6,7 +6,7 @@
 #include <sched.h>
 
 const unsigned int BLOCK_SIZE = 16;
-const unsigned int N = 256;
+const unsigned int N = 102400;
 const unsigned int BLOCKS = N / BLOCK_SIZE;
 const unsigned int END_BLOCK_SIZE = 32;
 
@@ -41,7 +41,7 @@ int main(){
 	// Prepare data
 
 	// 256 values
-	int data[] = {78,  22,  60,  62,  29,  57,   6,  48,  58,  38,  22,  64,  77,
+/*	int data[] = {78,  22,  60,  62,  29,  57,   6,  48,  58,  38,  22,  64,  77,
          3,  39,  39,  83,  14,   0,  71,  55,   5,  32,  76,  48,   8,
         65,  34,  40,  91,  42,  48,  19,  89,  56,  55,  19,  72,  91,
         14,  45,  14,  49,  81,  29,  53,  60,  82,  48,  18,  75,   8,
@@ -61,20 +61,20 @@ int main(){
         32,  97,  20,  27,  72,  87,   1,  31,  24,  66,   0,  24,  28,
         80,  47,  15,   8,  99,  10,  81,  18,  90,   8,  52,  33,  35,
         10,   1,  23,  84,  23,  64,  36,  20,  74};
+*/	
 	
-	/*
-	int data[N] = {};
+	int data[N] = {0};
 	std::default_random_engine generator;
   	std::uniform_int_distribution<int> distribution(0,100);
-	for (int i=0; i<N; ++i) {
-    	int number = distribution(generator);
-    	data[i] = number;
-  	}	
-	*/
+//	for (int i=0; i<N; ++i) {
+//    	int number = distribution(generator);
+//   	data[i] = number;
+//  	}	
+	
 	int* arr = (int*)aligned_alloc(64, sizeof(int) * N);
 	
 	for(int i = 0; i < N; i++){ // copy arr1 into a1
-		arr[i] = data[i];
+		arr[i] = distribution(generator);
 	}
 
 	
@@ -103,16 +103,16 @@ int main(){
 		int start_idx = 0;
 		int end_idx = N;
 
-		for(int arr_idx = start_idx; arr_idx < end_idx; arr_idx += sorted_block_size * 8){
+		for(int arr_idx = start_idx; arr_idx < end_idx; arr_idx += BLOCK_SIZE * 8){
 			// 8 starting indices and 8 ending indices				
 			int stA1 = arr_idx, 
-				stA2 = arr_idx + sorted_block_size,
-				stB1 = arr_idx + sorted_block_size * 2,
-				stB2 = arr_idx + sorted_block_size * 3,
-				stC1 = arr_idx + sorted_block_size * 4, 
-				stC2 = arr_idx + sorted_block_size * 5,
-				stD1 = arr_idx + sorted_block_size * 6, 
-				stD2 = arr_idx + sorted_block_size * 7; 
+				stA2 = arr_idx + BLOCK_SIZE,
+				stB1 = arr_idx + BLOCK_SIZE * 2,
+				stB2 = arr_idx + BLOCK_SIZE * 3,
+				stC1 = arr_idx + BLOCK_SIZE * 4, 
+				stC2 = arr_idx + BLOCK_SIZE * 5,
+				stD1 = arr_idx + BLOCK_SIZE * 6, 
+				stD2 = arr_idx + BLOCK_SIZE * 7; 
 			
 			int	eA1 = stA1 + BLOCK_SIZE, 
 				eA2 = stA2 + BLOCK_SIZE,
@@ -231,12 +231,17 @@ int main(){
 		sorted_block_size *= 2;
 	}
 	
-	std::cout << "Printing the contents of data:\n";
+	std::cout << "Printing the sorted blocks:\n";
 	for(int i = 0; i < N; i++){
-		if(i > 0 && i % 16 == 0){
+		
+		if(i > 0 && i % END_BLOCK_SIZE == 0){
+			std::cout << std::endl << std::endl;
+		}
+		else if(i > 0 && i % 16 == 0){
 			std::cout << "\n";
 		}
 		std::cout << arr[i] << " ";
+
 	}
 	std::cout << std::endl;
 
