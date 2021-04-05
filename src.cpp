@@ -36,7 +36,7 @@ int main(){
 	std::cout << "\n";
 	
 	// zmm register for block reversing indices	
-	int reverse_idxs[] = {15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0};
+/*	int reverse_idxs[] = {15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0};
 	int *rev_idx_ptr = (int*)aligned_alloc(64, sizeof(int)*BLOCK_SIZE);
 	for(int i = 0; i < BLOCK_SIZE; i++){
 		rev_idx_ptr[i] = reverse_idxs[i];
@@ -79,10 +79,10 @@ int main(){
 		__m512i new_h = _mm512_permutex2var_epi32(l,h_idx_vec,h);
 		print_vector_int(new_l, "New L"); // new output (L) in L2
 		print_vector_int(new_h, "New H"); // new output (H) in L2
-
+*/
 		/******* Start L2 to L3 ***********/	
 		// Perform a min and max on the two outputs from the last step, new_l and new_h
-		
+/*		
 		__m512i l2_min_l = _mm512_min_epi32(new_l, new_h);
 		__m512i l2_max_h = _mm512_max_epi32(new_l, new_h);
 	
@@ -109,9 +109,9 @@ int main(){
 		print_vector_int(new_l, "L2 first output"); // new output (L) in L3
 		print_vector_int(new_h, "L2 second output"); // new output (H) in L3
 	
-
+*/
 		/******* Start L3 to L4 *********/
-	
+/*	
 		__m512i l3_min_l = _mm512_min_epi32(new_l, new_h);
 		__m512i l3_max_h = _mm512_max_epi32(new_l, new_h);
 	
@@ -138,9 +138,9 @@ int main(){
 
 		print_vector_int(new_l, "L3 first output"); // new output (L) in L3
 		print_vector_int(new_h, "L3 second output"); // new output (H) in L3
-	
+*/	
 		/********** Start L4 to L5 ***************/
-	
+/*	
 		__m512i l4_min_l = _mm512_min_epi32(new_l, new_h);
 		__m512i l4_max_h = _mm512_max_epi32(new_l, new_h);
 	
@@ -166,9 +166,9 @@ int main(){
 
 		print_vector_int(new_l, "L4 first output"); // new output (L) in L4
 		print_vector_int(new_h, "L4 second output"); // new output (H) in L4
-
+*/
 		/***************** Start L5 ***********************/
-	
+/*	
 		__m512i l5_min_l = _mm512_min_epi32(new_l, new_h);
 		__m512i l5_max_h = _mm512_max_epi32(new_l, new_h);
 	
@@ -207,11 +207,147 @@ int main(){
 		std::cout << arr[i] << " ";
 	}
 	std::cout << "\n";
-	
+*/	
 // Start of psuedocode implementation
-	//__m512 A1in, A2in, B1in, B2in, C1in, C2in, D1in, D2in,A1out, A2out, B1out, B2out, C1out, C2out, D1out, D2out;	
-//	int sorted_block_size = 16;
-//	int ending_sorted_block_size = 16384;
+	__m512i A1in, A2in, B1in, B2in, C1in, C2in, D1in, D2in,A1out, A2out, B1out, B2out, C1out, C2out, D1out, D2out;	
+	int sorted_block_size = 16;
+	int end_sorted_block_size = 32;
 
+	while(sorted_block_size < end_sorted_block_size){
+		int start_idx = 0;
+		int end_idx = sorted_block_size;
+
+		for(int arr_idx = start_idx; arr_idx < end_idx; arr_idx += sorted_block_size * 8){
+			// 8 starting indices and 8 ending indices				
+			int stA1 = arr_idx, 
+				stA2 = arr_idx + BLOCK_SIZE,
+				stB1 = arr_idx + BLOCK_SIZE * 2,
+				stB2 = arr_idx + BLOCK_SIZE * 3;
+//				stC1 = arr_idx + sorted_block_size * 4, 
+//				stC2 = arr_idx + sorted_block_size * 5,
+//				stD1 = arr_idx + sorted_block_size * 6, 
+//				stD2 = arr_idx + sorted_block_size * 7, 
+			int	eA1 = stA1 + BLOCK_SIZE, 
+				eA2 = stA2 + BLOCK_SIZE,
+				eB1 = stB1 + BLOCK_SIZE, 
+				eB2 = stB2 + BLOCK_SIZE; 
+//				eC1 = stC1 + BLOCK_SIZE, 
+//				eC2 = stC2 + BLOCK_SIZE, 
+//				eD1 = stD1 + BLOCK_SIZE, 
+//				eD2 = stD2 + BLOCK_SIZE;
+
+			// 4 indices to track where to write back out to the array 
+			int write_A = stA1,
+		    	write_B = stB1;
+//				write_C = stC1, 
+//				write_D = stD1;
+			// Load 8 vectors
+			A1in = _mm512_load_si512(&arr[stA1]);
+			A2in = _mm512_load_si512(&arr[stA2]);	
+			B1in = _mm512_load_si512(&arr[stB1]);
+			B2in = _mm512_load_si512(&arr[stB2]);		
+//			C1in = _mm512_load_si512(&arr[stC1]);
+//			C2in = _mm512_load_si512(&arr[stC2]);	
+//			D1in = _mm512_load_si512(&arr[stD1]);
+//			D2in = _mm512_load_si512(&arr[stD2]);
+			
+			for(int j = 0; j < (sorted_block_size / 8) - 1; ++j){
+
+				std::cout << "Sorted block size: " << sorted_block_size << std::endl;		
+				
+				bitonic_sort(A1in, A2in, B1in, B2in, C1in, C2in, D1in, D2in, A1out, A2out, B1out,							B2out, C1out, C2out, D1out, D2out);
+				_mm512_store_si512(arr+write_A, A1out);
+				_mm512_store_si512(arr+write_B, B1out);
+//				_mm512_store_si512(arr+write_C, C1out);
+//				_mm512_store_si512(arr+write_D, D1out);
+				
+				write_A += 16;
+				write_B += 16;
+//				write_C += 16;
+//				write_D += 16;
+				
+				A1in = A2out;
+				B1in = B2out;
+//				C1in = C2out;
+//			    D1in = D2out;	
+				std::cout << "j: " << j << std::endl;	
+				if(j+1 == (sorted_block_size / 8) - 1){
+					_mm512_store_si512(arr+write_A, A2out);
+					_mm512_store_si512(arr+write_B, B2out);
+//					_mm512_store_si512(arr+write_C, C2out);
+//					_mm512_store_si512(arr+write_C, C2out);
+				}
+				else{
+					if(stA1 == eA1){
+						stA2 += 16;
+						A2in = _mm512_load_si512(&arr[stA2]);
+					}else if (stA2 == eA2){
+						stA1 += 16;
+						A2in = _mm512_load_si512(&arr[stA1]);
+					}else if (stA1 + 16 < stA2 + 16){
+						stA1 += 16;
+						A2in = _mm512_load_si512(&arr[stA1]);
+					}else{
+						stA2 +=16;
+						A2in = _mm512_load_si512(&arr[stA2]);
+					}
+					
+					if(stB1 == eB1){
+						stB2 += 16;
+						B2in = _mm512_load_si512(&arr[stB2]);
+					}else if (stB2 == eB2){
+						stB1 += 16;
+						B2in = _mm512_load_si512(&arr[stB1]);
+					}else if (stB1 + 16 < stB2 + 16){
+						stB1 += 16;
+						B2in = _mm512_load_si512(&arr[stB1]);
+					}else{
+						stB2 +=16;
+						B2in = _mm512_load_si512(&arr[stB2]);
+					}
+				/*	
+					if(stC1 == eC1){
+						stC2 += 16;
+						C2in = _mm512_load_si512(&arr[stC2]);
+					}else if (stC2 == eC2){
+						stC1 += 16;
+						C2in = _mm512_load_si512(&arr[stC1]);
+					}else if (stC1 + 16 < stC2 + 16){
+						stC1 += 16;
+						C2in = _mm512_load_si512(&arr[stC1]);
+					}else{
+						stC2 +=16;
+						C2in = _mm512_load_si512(&arr[stC2]);
+					}
+
+					if(stD1 == eD1){
+						stD2 += 16;
+						D2in = _mm512_load_si512(&arr[stD2]);
+					}else if (stD2 == eD2){
+						stD1 += 16;
+						D2in = _mm512_load_si512(&arr[stD1]);
+					}else if (stD1 + 16 < stD2 + 16){
+						stD1 += 16;
+						D2in = _mm512_load_si512(&arr[stD1]);
+					}else{
+						stD2 +=16;
+						D2in = _mm512_load_si512(&arr[stD2]);
+					} */
+				}	
+				
+			}		
+				
+		}
+		sorted_block_size *= 2;
+	}
+	
+	std::cout << "Printing the contents of data:\n";
+	for(int i = 0; i < 64; i++){
+		if(i > 0 && i % 16 == 0){
+			std::cout << "\n";
+		}
+		std::cout << arr[i] << " ";
+	}
+	std::cout << std::endl;
     return 0;
 }
