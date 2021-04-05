@@ -1,10 +1,14 @@
+//#define _GNU_SOURCE
 #include "utils.h"
 #include "bitonic_sort.h"
-#include "raw_bitonic.h"
+#include "random"
+#include <omp.h>
+#include <sched.h>
 
 const unsigned int BLOCK_SIZE = 16;
 const unsigned int N = 256;
 const unsigned int BLOCKS = N / BLOCK_SIZE;
+const unsigned int END_BLOCK_SIZE = 32;
 
 void sort_blocks(int* arr){
     int blocks = N / BLOCK_SIZE;
@@ -14,31 +18,39 @@ void sort_blocks(int* arr){
 }
 
 
+bool validator(int* checking){
+	int blocks = N / END_BLOCK_SIZE;
+	int i = 0;
+	while(i < blocks){
+		int tmp[END_BLOCK_SIZE] = {0};
+	    std::memcpy(&tmp[0], &checking[i*END_BLOCK_SIZE], sizeof(int)*END_BLOCK_SIZE);
+		std::sort(tmp, tmp+END_BLOCK_SIZE);
+		/*
+		std::cout << "Printing tmp: " << std::endl;
+		for(int j = 0; j < END_BLOCK_SIZE; j++){
+			std::cout << tmp[j] << " ";
+		}
+		std::cout << std::endl;
+		return -99;
+		*/
+		for(int v = 0; v < BLOCK_SIZE; v++){
+			if(tmp[v] != checking[i * END_BLOCK_SIZE + v]){
+				std::cout << "Block: " << i << std::endl;
+				for(int k = 0; k < END_BLOCK_SIZE; k++){
+					std::cout << tmp[k] << " ";	
+				}
+				return false;
+			}
+		}
+		i++;		
+	}
+	return true;
+}
+
+
 int main(){
     
 	// Prepare data
-	// 64 values
-
-	/*
-	int data[] = { 26, 61, 29, 47, 67, 28, 49, 35, 95, 99, 9, 20, 43, 45, 42, 42,
-					 4, 56, 33, 72, 0, 70, 50, 4, 6, 68, 98, 43, 64, 47, 76, 48,
-	 			   	 3, 60, 91, 42, 55, 37, 22, 40, 26, 55, 37, 45, 37, 74, 88, 0,
-					 45, 54, 13, 6, 80, 61, 63, 91, 86, 51, 66, 22, 38, 26, 84, 44 };
-	*/
-
-	// 128 values
-	/*
-	int data[] = {30,  48,  34,   0,  94,   2,  64,  47,  35,  51,  94,  20,   9,
-        20,  51,  67,   5,  72,  67,  26,  68,  93,   3,   6,  83,  99,
-        42,  16,  91,  15,  23,  36,  68,  67,  57,  23,  59,  20,  38,
-        27,  13,  68,  88,  24,  42,  20,  92,  12,  32,  71,   4,  40,
-        18,  10,  79,  95,  94,  47,  43,  75,  83,   4,  27,  32,  83,
-        76,   4,  93,  80,  62,   9,  85,  73,   0,  72,  78,  66,  64,
-        65,  58,   6,  51,  99,  81,  12,  19,  87,  50,  44,  27,  43,
-        52,  42,  60,  95,  19,  79,  50,  62,  46,  18,  25,  84,  35,
-         0,  84,  22,  39,   0,  69,  91,  87,  25,  10, 100,   8,  77,
-        72,  85,  86,  28,  89,  28,  59,  14,  68,  99,  95};
-	*/
 
 	// 256 values
 	int data[] = {78,  22,  60,  62,  29,  57,   6,  48,  58,  38,  22,  64,  77,
@@ -61,8 +73,16 @@ int main(){
         32,  97,  20,  27,  72,  87,   1,  31,  24,  66,   0,  24,  28,
         80,  47,  15,   8,  99,  10,  81,  18,  90,   8,  52,  33,  35,
         10,   1,  23,  84,  23,  64,  36,  20,  74};
-
-
+	
+	/*
+	int data[N] = {};
+	std::default_random_engine generator;
+  	std::uniform_int_distribution<int> distribution(0,100);
+	for (int i=0; i<N; ++i) {
+    	int number = distribution(generator);
+    	data[i] = number;
+  	}	
+	*/
 	int* arr = (int*)aligned_alloc(64, sizeof(int) * N);
 	
 	for(int i = 0; i < N; i++){ // copy arr1 into a1
@@ -72,6 +92,7 @@ int main(){
 	
     sort_blocks(arr); // Sort blocks of 16 with O(n^2) sort
 	
+		
 	/*
 	bit_sort(arr, BLOCK_SIZE, N);
 	return 0;	
@@ -88,7 +109,7 @@ int main(){
 	// Start of psuedocode implementation
 	__m512i A1in, A2in, B1in, B2in, C1in, C2in, D1in, D2in,A1out, A2out, B1out, B2out, C1out, C2out, D1out, D2out;	
 	int sorted_block_size = 16;
-	int end_sorted_block_size = 64;
+	int end_sorted_block_size = 32;
 
 	while(sorted_block_size < end_sorted_block_size){
 		int start_idx = 0;
@@ -228,6 +249,16 @@ int main(){
 			std::cout << "\n";
 		}
 		std::cout << arr[i] << " ";
+	}
+	std::cout << std::endl;
+
+	std::cout << "Validation Results: ";
+	int match = validator(arr);
+	if(match){
+		std::cout << "Passed";
+	}	
+	else{
+		std::cout << "Failed";
 	}
 	std::cout << std::endl;
     return 0;
