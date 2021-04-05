@@ -88,7 +88,7 @@ int main(){
 	// Start of psuedocode implementation
 	__m512i A1in, A2in, B1in, B2in, C1in, C2in, D1in, D2in,A1out, A2out, B1out, B2out, C1out, C2out, D1out, D2out;	
 	int sorted_block_size = 16;
-	int end_sorted_block_size = 32;
+	int end_sorted_block_size = 64;
 
 	while(sorted_block_size < end_sorted_block_size){
 		int start_idx = 0;
