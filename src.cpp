@@ -8,7 +8,7 @@
 const unsigned int BLOCK_SIZE = 16;
 const unsigned int N = 256;
 const unsigned int BLOCKS = N / BLOCK_SIZE;
-const unsigned int END_BLOCK_SIZE = 64;
+const unsigned int END_BLOCK_SIZE = 32;
 
 void sort_blocks(int* arr){
     int blocks = N / BLOCK_SIZE;
@@ -25,12 +25,8 @@ bool validator(int* checking){
 		int tmp[END_BLOCK_SIZE] = {0};
 	    std::memcpy(&tmp[0], &checking[i*END_BLOCK_SIZE], sizeof(int)*END_BLOCK_SIZE);
 		std::sort(tmp, tmp+END_BLOCK_SIZE);
-		for(int v = 0; v < BLOCK_SIZE; v++){
+		for(int v = 0; v < END_BLOCK_SIZE; v++){
 			if(tmp[v] != checking[i * END_BLOCK_SIZE + v]){
-				std::cout << "Block: " << i << std::endl;
-				for(int k = 0; k < END_BLOCK_SIZE; k++){
-					std::cout << tmp[k] << " ";	
-				}
 				return false;
 			}
 		}
