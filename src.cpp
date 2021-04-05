@@ -9,10 +9,7 @@ int out_idx = 0;
 void sort_blocks(int* arr){
     int blocks = N / BLOCK_SIZE;
 	for(int i = 0; i < BLOCKS; i++){
-		std::sort(arr + (BLOCK_SIZE * i), arr + (BLOCK_SIZE*(i+1)));
-		
-		//std::sort(arr+BLOCK_SIZE*i, arr+(BLOCK_SIZE*2*i));
-		//std::reverse(arr+BLOCK_SIZE*i, arr+(BLOCK_SIZE*2*i));
+		std::sort(arr + (BLOCK_SIZE * i), arr + (BLOCK_SIZE*(i+1)));	
 	}
 }
 
