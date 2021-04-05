@@ -99,7 +99,7 @@ int main(){
 	int sorted_block_size = 16;
 	int end_sorted_block_size = END_BLOCK_SIZE;
 
-	while(sorted_block_size < end_sorted_block_size){
+	while(sorted_block_size <= end_sorted_block_size){
 		int start_idx = 0;
 		int end_idx = N;
 
