@@ -28,28 +28,28 @@ void bitonic_sort(__m512i &A1in, __m512i &A2in, __m512i &B1in, __m512i &B2in,
 	A2in = _mm512_permutexvar_epi32(_mm512_load_si512(&reverse_idxs[0]), A2in);
 	B2in = _mm512_permutexvar_epi32(_mm512_load_si512(&reverse_idxs[0]), B2in);	
 
-	print_vector_int(A1in, "A1in");
-    print_vector_int(A2in, "A2in");
+//	print_vector_int(A1in, "A1in");
+//    print_vector_int(A2in, "A2in");
  
-  //  print_vector_int(B1in, "B1in");
-    //  print_vector_int(B2in, "B2in");
+//    print_vector_int(B1in, "B1in");
+//    print_vector_int(B2in, "B2in");
 
 
-//	C2in = _mm512_permutexvar_epi32(_mm512_load_si512(&reverse_idxs[0]), C2in);
-//	D2in = _mm512_permutexvar_epi32(_mm512_load_si512(&reverse_idxs[0]), D2in);
+	C2in = _mm512_permutexvar_epi32(_mm512_load_si512(&reverse_idxs[0]), C2in);
+	D2in = _mm512_permutexvar_epi32(_mm512_load_si512(&reverse_idxs[0]), D2in);
 	
 	// For each bitonic merge level 
 	for(int l = 1; l <= 5; l++){
 		// Get the mins
 		auto minA = _mm512_min_epi32(A1in, A2in);
 		auto minB = _mm512_min_epi32(B1in, B2in);
-//		auto minC = _mm512_min_epi32(C1in, C2in);
-//		auto minD = _mm512_min_epi32(D1in, D2in);
+		auto minC = _mm512_min_epi32(C1in, C2in);
+		auto minD = _mm512_min_epi32(D1in, D2in);
 		// Get the maxes
 		auto maxA = _mm512_max_epi32(A1in, A2in);
 		auto maxB = _mm512_max_epi32(B1in, B2in);
-//		auto maxC = _mm512_max_epi32(C1in, C2in);
-//		auto maxD = _mm512_max_epi32(D1in, D2in);
+		auto maxC = _mm512_max_epi32(C1in, C2in);
+		auto maxD = _mm512_max_epi32(D1in, D2in);
 		
 		// Get the permute indices based on the level
 		__m512i l_idx_vec;
@@ -78,25 +78,25 @@ void bitonic_sort(__m512i &A1in, __m512i &A2in, __m512i &B1in, __m512i &B2in,
 		// Permute
 		A1out = _mm512_permutex2var_epi32(minA, l_idx_vec, maxA);
 		B1out = _mm512_permutex2var_epi32(minB, l_idx_vec, maxB);
-		print_vector_int(A1out, "A1out contains:");
-//		C1out = _mm512_permutex2var_epi32(minC, l_idx_vec, maxC);
-//		D1out = _mm512_permutex2var_epi32(minD, l_idx_vec, maxD);
+//		print_vector_int(A1out, "A1out contains:");
+		C1out = _mm512_permutex2var_epi32(minC, l_idx_vec, maxC);
+		D1out = _mm512_permutex2var_epi32(minD, l_idx_vec, maxD);
 	
 		A2out = _mm512_permutex2var_epi32(minA, h_idx_vec, maxA);
-		print_vector_int(A2out, "A2out contains");
+//		print_vector_int(A2out, "A2out contains");
 		B2out = _mm512_permutex2var_epi32(minB, h_idx_vec, maxB);
-//		C2out = _mm512_permutex2var_epi32(minC, h_idx_vec, maxC);
-//		D2out = _mm512_permutex2var_epi32(minD, h_idx_vec, maxD);
+		C2out = _mm512_permutex2var_epi32(minC, h_idx_vec, maxC);
+		D2out = _mm512_permutex2var_epi32(minD, h_idx_vec, maxD);
 
 		A1in = A1out;
 		B1in = B1out;
-//		C1in = C1out;
-//		D1in = D1out;
+		C1in = C1out;
+		D1in = D1out;
 		
 		A2in = A2out;
 		B2in = B2out;
-//		C2in = C2out;
-//		D2in = D2out;		
+		C2in = C2out;
+		D2in = D2out;		
 
 	}	
 	return;
