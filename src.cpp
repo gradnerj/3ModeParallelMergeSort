@@ -8,7 +8,7 @@
 const unsigned int BLOCK_SIZE = 16;
 const unsigned int N = 256;
 const unsigned int BLOCKS = N / BLOCK_SIZE;
-const unsigned int END_BLOCK_SIZE = 32;
+const unsigned int END_BLOCK_SIZE = 64;
 
 void sort_blocks(int* arr){
     int blocks = N / BLOCK_SIZE;
@@ -25,14 +25,6 @@ bool validator(int* checking){
 		int tmp[END_BLOCK_SIZE] = {0};
 	    std::memcpy(&tmp[0], &checking[i*END_BLOCK_SIZE], sizeof(int)*END_BLOCK_SIZE);
 		std::sort(tmp, tmp+END_BLOCK_SIZE);
-		/*
-		std::cout << "Printing tmp: " << std::endl;
-		for(int j = 0; j < END_BLOCK_SIZE; j++){
-			std::cout << tmp[j] << " ";
-		}
-		std::cout << std::endl;
-		return -99;
-		*/
 		for(int v = 0; v < BLOCK_SIZE; v++){
 			if(tmp[v] != checking[i * END_BLOCK_SIZE + v]){
 				std::cout << "Block: " << i << std::endl;
@@ -109,7 +101,7 @@ int main(){
 	// Start of psuedocode implementation
 	__m512i A1in, A2in, B1in, B2in, C1in, C2in, D1in, D2in,A1out, A2out, B1out, B2out, C1out, C2out, D1out, D2out;	
 	int sorted_block_size = 16;
-	int end_sorted_block_size = 32;
+	int end_sorted_block_size = END_BLOCK_SIZE;
 
 	while(sorted_block_size < end_sorted_block_size){
 		int start_idx = 0;
