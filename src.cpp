@@ -77,22 +77,24 @@ int main(){
 	return 0;	
     */
 	
+	/*	
 	std::cout << "Printing data in sorted blocks of 16" << std::endl;
 	for(int i = 0; i < N; i++){
 		std::cout << arr[i] << " ";
 	}
 	std::cout << "\n";
-	
+	*/
+
 	// Start of psuedocode implementation
 	__m512i A1in, A2in, B1in, B2in, C1in, C2in, D1in, D2in,A1out, A2out, B1out, B2out, C1out, C2out, D1out, D2out;	
 	int sorted_block_size = 16;
-	int end_sorted_block_size = 16;
+	int end_sorted_block_size = 32;
 
-	while(sorted_block_size <= end_sorted_block_size){
+	while(sorted_block_size < end_sorted_block_size){
 		int start_idx = 0;
-		int end_idx = sorted_block_size*8;
+		int end_idx = N;
 
-		for(int arr_idx = start_idx; arr_idx <= end_idx; arr_idx += sorted_block_size * 8){
+		for(int arr_idx = start_idx; arr_idx < end_idx; arr_idx += sorted_block_size * 8){
 			// 8 starting indices and 8 ending indices				
 			int stA1 = arr_idx, 
 				stA2 = arr_idx + sorted_block_size,
@@ -130,7 +132,7 @@ int main(){
 			
 			for(int j = 0; j < (sorted_block_size / 8) - 1; j++){
 
-				std::cout << "Sorted block size: " << sorted_block_size << std::endl;		
+				std::cout << "j:  "  << j << " Sorted block size: " << sorted_block_size << std::endl;		
 				
 				bitonic_sort(A1in, A2in, B1in, B2in, C1in, C2in, D1in, D2in, A1out, A2out, B1out, 
 								B2out, C1out, C2out, D1out, D2out);
@@ -149,13 +151,12 @@ int main(){
 				B1in = B2out;
 				C1in = C2out;
 			    D1in = D2out;	
-				std::cout << "j: " << j << std::endl;	
 				
 				if(j+1 == ((sorted_block_size / 8) - 1)){
 					_mm512_store_si512(arr+write_A, A2out);
 					_mm512_store_si512(arr+write_B, B2out);
 					_mm512_store_si512(arr+write_C, C2out);
-					_mm512_store_si512(arr+write_C, C2out);
+					_mm512_store_si512(arr+write_D, D2out);
 				}
 				else{
 					if(stA1 == eA1){
