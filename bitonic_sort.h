@@ -1,20 +1,27 @@
 #ifndef _BITONIC_SORT_H_
 #define _BITONIC_SORT_H_
 
-int reverse_idxs[] = {15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0};
+// Indices used for permutation
 
-int l1_idx[] = {0,1,2,3,4,5,6,7,16,17,18,19,20,21,22,23};
+int reverse_idxs[] = {15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0}; // Reversing with permutation indices
+
+// Level 1 indices
+int l1_idx[] = {0,1,2,3,4,5,6,7,16,17,18,19,20,21,22,23}; 
 int h1_idx[] = {8,9,10,11,12,13,14,15,24,25,26,27,28,29,30,31};
 
+// Level 2 indices
 int l2_idx[] = {0,1,2,3,16,17,18,19,8,9,10,11,24,25,26,27};
 int h2_idx[] = {4,5,6,7,20,21,22,23,12,13,14,15,28,29,30,31};
 
+// Level 3 indices
 int l3_idx[] = {0,1,16,17,4,5,20,21,8,9,24,25,12,13,28,29};
 int h3_idx[] = {2,3,18,19,6,7,22,23,10,11,26,27,14,15,30,31}; 
 
+// Level 4 indices
 int l4_idx[] = {0,16,2,18,4,20,6,22,8,24,10,26,12,28,14,30};
 int h4_idx[] = {1,17,3,19,5,21,7,23,9,25,11,27,13,29,15,31};
 
+// Level 5 indices
 int l5_idx[] = {0,16,1,17,2,18,3,19,4,20,5,21,6,22,7,23};
 int h5_idx[] = {8,24,9,25,10,26,11,27,12,28,13,29,14,30,15,31};
 
@@ -27,14 +34,6 @@ void bitonic_sort(__m512i &A1in, __m512i &A2in, __m512i &B1in, __m512i &B2in,
 	// Reversing the second input vectors
 	A2in = _mm512_permutexvar_epi32(_mm512_load_si512(&reverse_idxs[0]), A2in);
 	B2in = _mm512_permutexvar_epi32(_mm512_load_si512(&reverse_idxs[0]), B2in);	
-
-//	print_vector_int(A1in, "A1in");
-//    print_vector_int(A2in, "A2in");
- 
-//    print_vector_int(B1in, "B1in");
-//    print_vector_int(B2in, "B2in");
-
-
 	C2in = _mm512_permutexvar_epi32(_mm512_load_si512(&reverse_idxs[0]), C2in);
 	D2in = _mm512_permutexvar_epi32(_mm512_load_si512(&reverse_idxs[0]), D2in);
 	
@@ -88,6 +87,7 @@ void bitonic_sort(__m512i &A1in, __m512i &A2in, __m512i &B1in, __m512i &B2in,
 		C2out = _mm512_permutex2var_epi32(minC, h_idx_vec, maxC);
 		D2out = _mm512_permutex2var_epi32(minD, h_idx_vec, maxD);
 
+
 		A1in = A1out;
 		B1in = B1out;
 		C1in = C1out;
@@ -98,7 +98,8 @@ void bitonic_sort(__m512i &A1in, __m512i &A2in, __m512i &B1in, __m512i &B2in,
 		C2in = C2out;
 		D2in = D2out;		
 
-	}	
+	}
+	// L5 is done.	
 	return;
 } 
 
