@@ -77,27 +77,25 @@ void bitonic_sort(__m512i &A1in, __m512i &A2in, __m512i &B1in, __m512i &B2in,
 		// Permute
 		A1out = _mm512_permutex2var_epi32(minA, l_idx_vec, maxA);
 		B1out = _mm512_permutex2var_epi32(minB, l_idx_vec, maxB);
-//		print_vector_int(A1out, "A1out contains:");
 		C1out = _mm512_permutex2var_epi32(minC, l_idx_vec, maxC);
 		D1out = _mm512_permutex2var_epi32(minD, l_idx_vec, maxD);
 	
 		A2out = _mm512_permutex2var_epi32(minA, h_idx_vec, maxA);
-//		print_vector_int(A2out, "A2out contains");
 		B2out = _mm512_permutex2var_epi32(minB, h_idx_vec, maxB);
 		C2out = _mm512_permutex2var_epi32(minC, h_idx_vec, maxC);
 		D2out = _mm512_permutex2var_epi32(minD, h_idx_vec, maxD);
 
-
-		A1in = A1out;
-		B1in = B1out;
-		C1in = C1out;
-		D1in = D1out;
+//		if(l < 5){
+			A1in = A1out;
+			B1in = B1out;
+			C1in = C1out;
+			D1in = D1out;
 		
-		A2in = A2out;
-		B2in = B2out;
-		C2in = C2out;
-		D2in = D2out;		
-
+			A2in = A2out;
+			B2in = B2out;
+			C2in = C2out;
+			D2in = D2out;
+//		}		
 	}
 	// L5 is done.	
 	return;

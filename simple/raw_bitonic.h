@@ -135,7 +135,7 @@ void bit_sort(int* arr, int BLOCK_SIZE, int N){
         }
         std::cout << "\n";
     }
-    
+    std::cout << "Printing Result:" << std::endl;    
     for(int i = 0; i < N; i++){
         if(i > 0 && i % 16 == 0){
 			std::cout << "\n";

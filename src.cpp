@@ -6,9 +6,9 @@
 #include <sched.h>
 
 const unsigned int BLOCK_SIZE = 16;
-const unsigned int N = 256;
+const unsigned int N = 1024;
 const unsigned int BLOCKS = N / BLOCK_SIZE;
-const unsigned int END_BLOCK_SIZE = 64;
+const unsigned int END_BLOCK_SIZE = 128;
 
 // Sorts all blocks of 16 given an array.
 void sort_blocks(int* arr){
@@ -45,7 +45,8 @@ int main(){
   	std::uniform_int_distribution<int> distribution(0,100);
 	
 	int* arr = (int*)aligned_alloc(64, sizeof(int) * N);
-	
+	int* output = (int*)aligned_alloc(64, sizeof(int)*N);
+
 	for(int i = 0; i < N; i++){ // Generate N normally distributed integers.
 		arr[i] = distribution(generator);
 	}
@@ -107,38 +108,45 @@ int main(){
 								B2out, C1out, C2out, D1out, D2out);
 				
 				// Write first output to memory
-				_mm512_store_si512(arr+write_A, A1out);
-				_mm512_store_si512(arr+write_B, B1out);
-				_mm512_store_si512(arr+write_C, C1out);
-				_mm512_store_si512(arr+write_D, D1out);
+				_mm512_store_si512(output+write_A, A1out);
+				_mm512_store_si512(output+write_B, B1out);
+				_mm512_store_si512(output+write_C, C1out);
+				_mm512_store_si512(output+write_D, D1out);
 				
+
 				// Increment write indices
 				write_A += 16;
 				write_B += 16;
 				write_C += 16;
 				write_D += 16;
 				
-				// Reuse second outputs	
-				A1in = A2out;
-				B1in = B2out;
-				C1in = C2out;
-			    D1in = D2out;	
+
 				
 				
-				if(j + 1 == ((sorted_block_size / 8) - 1)){ // if on the last iteration, write second outputs to memory
-					_mm512_store_si512(arr+write_A, A2out);
-					_mm512_store_si512(arr+write_B, B2out);
-					_mm512_store_si512(arr+write_C, C2out);
-					_mm512_store_si512(arr+write_D, D2out);
+				if(j == (sorted_block_size / 8)-2){ // if on the last iteration, write second outputs to memory
+					_mm512_store_si512(output+write_A, A2out);
+					_mm512_store_si512(output+write_B, B2out);
+					_mm512_store_si512(output+write_C, C2out);
+					_mm512_store_si512(output+write_D, D2out);
+					write_A += 16;
+					write_B += 16;
+					write_C += 16;
+					write_D += 16;
 				}
 				else{ // Determine the second input for the next iteration
-					if(stA1 == eA1){
+
+					// Reuse second outputs	
+					A1in = A2out;
+					B1in = B2out;
+					C1in = C2out;
+			    	D1in = D2out;	
+					if(stA1+16 == eA1){
 						stA2 += 16;
 						A2in = _mm512_load_si512(&arr[stA2]);
-					}else if (stA2 == eA2){
+					}else if (stA2+16 == eA2){
 						stA1 += 16;
 						A2in = _mm512_load_si512(&arr[stA1]);
-					}else if (stA1 + 16 < stA2 + 16){
+					}else if (arr[stA1 + 16] < arr[stA2 + 16]){
 						stA1 += 16;
 						A2in = _mm512_load_si512(&arr[stA1]);
 					}else{
@@ -146,13 +154,13 @@ int main(){
 						A2in = _mm512_load_si512(&arr[stA2]);
 					}
 					
-					if(stB1 == eB1){
+					if(stB1+16 == eB1){
 						stB2 += 16;
 						B2in = _mm512_load_si512(&arr[stB2]);
-					}else if (stB2 == eB2){
+					}else if (stB2+16 == eB2){
 						stB1 += 16;
 						B2in = _mm512_load_si512(&arr[stB1]);
-					}else if (stB1 + 16 < stB2 + 16){
+					}else if (arr[stB1 + 16] < arr[stB2 + 16]){
 						stB1 += 16;
 						B2in = _mm512_load_si512(&arr[stB1]);
 					}else{
@@ -160,13 +168,13 @@ int main(){
 						B2in = _mm512_load_si512(&arr[stB2]);
 					}
 					
-					if(stC1 == eC1){
+					if(stC1+16 == eC1){
 						stC2 += 16;
 						C2in = _mm512_load_si512(&arr[stC2]);
-					}else if (stC2 == eC2){
+					}else if (stC2+16 == eC2){
 						stC1 += 16;
 						C2in = _mm512_load_si512(&arr[stC1]);
-					}else if (stC1 + 16 < stC2 + 16){
+					}else if (arr[stC1 + 16] < arr[stC2 + 16]){
 						stC1 += 16;
 						C2in = _mm512_load_si512(&arr[stC1]);
 					}else{
@@ -174,24 +182,29 @@ int main(){
 						C2in = _mm512_load_si512(&arr[stC2]);
 					}
 
-					if(stD1 == eD1){
+					if(stD1+16 == eD1){
 						stD2 += 16;
 						D2in = _mm512_load_si512(&arr[stD2]);
-					}else if (stD2 == eD2){
+					}else if (stD2+16 == eD2){
 						stD1 += 16;
 						D2in = _mm512_load_si512(&arr[stD1]);
-					}else if (stD1 + 16 < stD2 + 16){
+					}else if (arr[stD1 + 16] < arr[stD2 + 16]){
 						stD1 += 16;
 						D2in = _mm512_load_si512(&arr[stD1]);
 					}else{
 						stD2 +=16;
 						D2in = _mm512_load_si512(&arr[stD2]);
 					} 
+
+
+					
 				}	
 				
 			}		
 				
 		}
+
+		std::swap(arr, output);
 		sorted_block_size = sorted_block_size * 2;
 	}
 	
