@@ -9,16 +9,18 @@
 #include <math.h>
 #include "index_logic.h"
 const unsigned int BLOCK_SIZE = 16;
-const unsigned int N = 33554432;
+const unsigned int N = 33'554'432;
+//const unsigned int N = 1073741824;
+//const unsigned int N = 1024;
 const unsigned int BLOCKS = N / BLOCK_SIZE;
 const unsigned int END_BLOCK_SIZE = 16384;
 const unsigned int BLOCK_OF_SORTED_BLOCKS = 65536;
 
 // Sorts all blocks of 16 given an array.
-void sort_blocks(int* arr){
-    int blocks = N / BLOCK_SIZE;
-	for(int i = 0; i < BLOCKS; i++){
-		std::sort(arr + (BLOCK_SIZE * i), arr + (BLOCK_SIZE*(i+1)));	
+void sort_blocks(int* arr, int block_size){
+    int blocks = block_size / 16;
+	for(int i = 0; i < blocks; i++){
+		std::sort(arr + (16 * i), arr + (16*(i+1)));	
 	}
 }
 
@@ -43,6 +45,7 @@ bool validator(int* checking){
 }
 
 
+
 int main(){
     
 	// Prepare data
@@ -50,15 +53,18 @@ int main(){
   	std::uniform_int_distribution<int> distribution(0,100);
 	
 	int* arr1 = (int*)aligned_alloc(64, sizeof(int) * N);
-
 	int* out = (int*)aligned_alloc(64, sizeof(int) * N);
 
+/*    for(int i = 0; i < N; i++){
+		arr1[i] = values[i];
+	}
+*/
 	for(int i = 0; i < N; i++){ // Generate N normally distributed integers.
 		arr1[i] = distribution(generator);
 	}
 
    	
-    sort_blocks(arr1); // Sort blocks of 16 with O(nlgn) sort
+  //  sort_blocks(arr1); // Sort blocks of 16 with O(nlgn) sort
 	int power_of_n = log2(END_BLOCK_SIZE);
 	int current_work_unit = 0;	
 	StopWatch sw;
@@ -74,6 +80,7 @@ int main(){
 		int start_idx = local_work_unit * BLOCK_OF_SORTED_BLOCKS;
 		int end_idx = (local_work_unit+1) * BLOCK_OF_SORTED_BLOCKS;
 		int * arr = arr1;
+		sort_blocks(&arr[start_idx], BLOCK_OF_SORTED_BLOCKS); 
 		int * output = out;	
 		
 		if(power_of_n % 2 == 0){
@@ -83,7 +90,7 @@ int main(){
 		}
 	}
 	printf("Time elapsed: %f seconds\n", sw.elapsed());
-/*	
+/*	sw.reset();	
 	std::cout << "Printing the sorted blocks in input: \n";
 	for(int i = 0; i < N; i++){
 		
@@ -121,5 +128,7 @@ int main(){
 		std::cout << "Failed";
 	}
 	std::cout << std::endl;
+	
+//	printf("Time elapsed: %f seconds\n", sw.elapsed());
     return 0;
 }
