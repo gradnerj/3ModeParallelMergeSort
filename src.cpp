@@ -8,9 +8,10 @@
 #include <cstdio>
 
 const unsigned int BLOCK_SIZE = 16;
-const unsigned int N = 2048;
+const unsigned int N = 33554432;
 const unsigned int BLOCKS = N / BLOCK_SIZE;
 const unsigned int END_BLOCK_SIZE = 128;
+const unsigned int BLOCK_OF_SORTED_BLOCKS = 65536;
 
 // Sorts all blocks of 16 given an array.
 void sort_blocks(int* arr){
@@ -23,7 +24,7 @@ void sort_blocks(int* arr){
 // Makes copy of unsorted data in chunks of END_BLOCK_SIZE and
 // compares each element to the output from the bitonic sort/merge.
 bool validator(int* checking){
-	int blocks = N / END_BLOCK_SIZE;
+	int blocks = N / (END_BLOCK_SIZE);
 	int i = 0;
 	while(i < blocks){
 		int tmp[END_BLOCK_SIZE] = {0};
@@ -31,6 +32,7 @@ bool validator(int* checking){
 		std::sort(tmp, tmp+END_BLOCK_SIZE);
 		for(int v = 0; v < END_BLOCK_SIZE; v++){
 			if(tmp[v] != checking[i * END_BLOCK_SIZE + v]){
+				std::cout << tmp[v] << " != " << checking[i * END_BLOCK_SIZE + v] << std::endl;
 				return false;
 			}
 		}
@@ -38,6 +40,9 @@ bool validator(int* checking){
 	}
 	return true;
 }
+
+
+
 
 
 int main(){
@@ -62,8 +67,8 @@ int main(){
 	int end_sorted_block_size = END_BLOCK_SIZE;
 	int current_work_unit = 0;	
 
-	#pragma omp parallel for schedule(dynamic) num_threads(2)
-	for(unsigned int i=0; i < N; i+= 1024){
+	#pragma omp parallel for schedule(dynamic) num_threads(4)
+	for(unsigned int i=0; i < N; i+= BLOCK_OF_SORTED_BLOCKS){
 		int local_work_unit;
 		#pragma omp critical
 		{
@@ -71,8 +76,8 @@ int main(){
 			current_work_unit++;
 		}
 		int sorted_block_size = 16;
-		int start_idx = local_work_unit * 1024;
-		int end_idx = (local_work_unit+1) * 1024;
+		int start_idx = local_work_unit * BLOCK_OF_SORTED_BLOCKS;
+		int end_idx = (local_work_unit+1) * BLOCK_OF_SORTED_BLOCKS;
 		int * arr = arr1;
 		int * output = out;	
 
@@ -80,9 +85,9 @@ int main(){
 		__m512i A1in, A2in, B1in, B2in, C1in, C2in, D1in, D2in,A1out, A2out, B1out, B2out, C1out, C2out, D1out, D2out;
 
 
-		while(sorted_block_size <= end_sorted_block_size){
+		while(sorted_block_size < end_sorted_block_size){
 
-		printf("Thread %d is on sorted_blcok_size: %d and startIdx %d and endIdx %d\n", omp_get_thread_num(), sorted_block_size, start_idx, end_idx);		
+	//		printf("Thread %d is on sorted_blcok_size: %d and startIdx %d and endIdx %d\n", omp_get_thread_num(), sorted_block_size, start_idx, end_idx);		
 			for(int arr_idx = start_idx; arr_idx < end_idx; arr_idx += sorted_block_size * 8){
 				// 8 starting indices
 				int stA1 = arr_idx,
@@ -229,7 +234,7 @@ int main(){
 			sorted_block_size = sorted_block_size * 2;
 		}
 	}
-	
+/*	
 	std::cout << "Printing the sorted blocks in input: \n";
 	for(int i = 0; i < N; i++){
 		
@@ -244,7 +249,7 @@ int main(){
 	}
 	std::cout << std::endl;
 
-/*	std::cout << "Printing the sorted blocks in ouput: \n";
+	std::cout << "Printing the sorted blocks in ouput: \n";
 	for(int i = 0; i < N; i++){
 		
 		if(i > 0 && i % END_BLOCK_SIZE == 0){
