@@ -61,7 +61,7 @@ int main(){
     sort_blocks(arr1); // Sort blocks of 16 with O(nlgn) sort
 	int power_of_n = log2(END_BLOCK_SIZE);
 	int current_work_unit = 0;	
-
+	StopWatch sw;
 	#pragma omp parallel for schedule(dynamic) num_threads(64)
 	for(unsigned int i=0; i < N; i+= BLOCK_OF_SORTED_BLOCKS){
 		int local_work_unit;
@@ -82,6 +82,7 @@ int main(){
 			n_is_odd(sorted_block_size, END_BLOCK_SIZE,  start_idx, end_idx, arr, output);
 		}
 	}
+	printf("Time elapsed: %f seconds\n", sw.elapsed());
 /*	
 	std::cout << "Printing the sorted blocks in input: \n";
 	for(int i = 0; i < N; i++){
