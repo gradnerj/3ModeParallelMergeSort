@@ -3,6 +3,22 @@
 #include <chrono>
 #include <cstdio>
 #include <bits/stdc++.h>
+#include <ctime>
+
+using namespace std::chrono;
+
+class StopWatch{
+	private:
+		high_resolution_clock::time_point start;
+		
+	public:
+		StopWatch(){start = high_resolution_clock::now();}
+		void reset(){start = high_resolution_clock::now();}
+		double elapsed(){return duration_cast<duration<double>>(high_resolution_clock::now() - start).count();}
+
+
+};
+
 
 void print_vector_int(__m512i v, std::string name){
     #if defined (__GNUC__)
