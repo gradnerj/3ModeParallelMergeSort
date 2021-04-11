@@ -14,7 +14,7 @@ class StopWatch{
 	public:
 		StopWatch(){start = high_resolution_clock::now();}
 		void reset(){start = high_resolution_clock::now();}
-		double elapsed(){return duration_cast<duration<double>>(high_resolution_clock::now() - start).count();}
+		double elapsed(){return duration_cast<duration<double, std::milli>>(high_resolution_clock::now() - start).count();}
 
 
 };

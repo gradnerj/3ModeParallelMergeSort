@@ -84,12 +84,14 @@ int main(){
 		int * output = out;	
 		
 		if(power_of_n % 2 == 0){
+//			printf("n is even\n");
 			n_is_even(sorted_block_size, END_BLOCK_SIZE,  start_idx, end_idx, arr, output);
 		}else{
+//			printf("n is odd\n");
 			n_is_odd(sorted_block_size, END_BLOCK_SIZE,  start_idx, end_idx, arr, output);
 		}
 	}
-	printf("Time elapsed: %f seconds\n", sw.elapsed());
+	printf("Time elapsed: %f milliseconds\n", sw.elapsed());
 /*	sw.reset();	
 	std::cout << "Printing the sorted blocks in input: \n";
 	for(int i = 0; i < N; i++){
