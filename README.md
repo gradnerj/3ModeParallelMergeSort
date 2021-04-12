@@ -9,3 +9,6 @@ This merge sort uses three levels of parallelism:
 
 The paper above uses 128-bit registers and produces results 3.3x faster than the scaler version. I've scaled up to using 512-bit registers and the wall times can be seen below for sorting 2<sup>25</sup> elements.
 
+Note that with 512-bit registers the speed-up is approximately 75x. However, my implementation is sorting into sorted blocks of 2<sup>14</sup>. 
+
+![wall_times](./mergeSortWallTimes.png)
